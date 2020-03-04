@@ -1,0 +1,22 @@
+{
+  "name": "whatsapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "http": "0.0.0",
+    "jimp": "^0.9.5",
+    "node-fetch": "^2.6.0",
+    "promisify": "0.0.3",
+    "qrcode-terminal": "^0.12.0",
+    "request": "^2.88.2",
+    "util": "^0.12.2",
+    "whatsapp-web.js": "^1.2.0"
+  }
+}

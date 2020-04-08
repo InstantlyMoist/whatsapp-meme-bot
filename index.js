@@ -5,6 +5,7 @@ let Jimp = require("jimp");
 let request = require('request');
 const { readFile } = require('fs');
 const { promisify } = require('util');
+let keys = require('./key.json');
 let readFileAsync = promisify(readFile);
 
 const SESSION_FILE_PATH = "./session.json";
@@ -57,7 +58,7 @@ client.on('message', msg => {
         msg.reply(possible[Math.floor(Math.random() * possible.length)]);
     }
     if (msg.body == '!meme') {
-       sendMeme(msg);
+        sendMeme(msg);
     }
     if (msg.body == '!rik') {
         msg.reply("WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH");
@@ -65,29 +66,54 @@ client.on('message', msg => {
     if (msg.body.toLowerCase().includes("herres")) {
         msg.reply("HAHAHAHAHAHA, HIJ ZEI HERRES!");
     }
+    if (msg.body.toLowerCase().startsWith("!fortnite")) {
+        let split = msg.body.split(" ");
+        if (split.length == 1) {
+            msg.reply("Specificeer een gebruikersnaam!");
+            return;
+        }
+        sendStats(msg, split[1]);
+    }
 });
+
+async function sendStats(msg, playerName) {
+    let response = await fetch(`https://api.fortnitetracker.com/v1/profile/pc/${playerName}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "TRN-Api-Key": keys.fortnite,
+        },
+        credentials: "same-origin"
+    });
+    let body = await response.json();
+    let statsString = "";
+    for (let stat in body.lifeTimeStats) {
+        statsString += `${body.lifeTimeStats[stat].key} : ${body.lifeTimeStats[stat].value}\n`;
+    }
+    msg.reply(`Statistieken voor ${playerName}:\n\n${statsString}`);
+}
 
 async function sendMeme(msg) {
     let newMeme = await getMemeJSON();
-    downloadImageFromUrl(newMeme, async (success) => {
+    downloadImageFromUrl(newMeme.url, async (success) => {
         if (!success) return;
         var imageAsBase64 = fs.readFileSync('./meme.jpg', 'base64');
-        var mm = new MessageMedia("image/jpg",imageAsBase64);
-        msg.reply(mm)
+        var mm = new MessageMedia("image/jpg", imageAsBase64);
+        client.sendMessage(msg.from, mm, { caption: newMeme.title });
     });
 }
 
 async function getMemeJSON() {
     let response = await fetch('http://meme-api.herokuapp.com/gimme');
     let data = await response.json();
-    return data.url;
+    return data;
 }
 
 async function convertMeme() {
     Jimp.read("./meme.png", function (err, image) {
-      image.scaleToFit(512, 512).write("./meme.jpg");
+        image.scaleToFit(512, 512).write("./meme.jpg");
     });
-  }
+}
 
 async function downloadImageFromUrl(url, callback) {
     let extension = url.endsWith("png") ? "png" : "jpg";
@@ -101,5 +127,3 @@ async function downloadImageFromUrl(url, callback) {
 }
 
 client.initialize();
-
-//TODO: split this shit

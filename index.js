@@ -50,6 +50,9 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
+    if (msg.mediaKey == '/HGPJEtiCMoCU3rRSgNr2966teO0KLMrpSi+/LpIMDY=') {
+        msg.reply('B');
+    }
     if (msg.body == '!ping') {
         msg.reply('pong');
     }
@@ -71,6 +74,7 @@ client.on('message', msg => {
             msg.reply("Specificeer een gebruikersnaam!");
             return;
         }
+
         sendStats(msg, msg.body.replace("!fortnite ", ""));
     }
 });

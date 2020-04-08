@@ -51,7 +51,6 @@ client.on('ready', () => {
 
 client.on('message', msg => {
     if (msg.body == '!ping') {
-        msg.downloadMedia();
         msg.reply('pong');
     }
     if (msg.body == '!bart') {
@@ -72,7 +71,7 @@ client.on('message', msg => {
             msg.reply("Specificeer een gebruikersnaam!");
             return;
         }
-        sendStats(msg, split[1]);
+        sendStats(msg, msg.body.replace("!fortnite ", ""));
     }
 });
 

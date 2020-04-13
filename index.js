@@ -6,6 +6,7 @@ let request = require('request');
 const { readFile } = require('fs');
 const { promisify } = require('util');
 let keys = require('./key.json');
+let responses = require('./responses.json');
 let readFileAsync = promisify(readFile);
 
 const SESSION_FILE_PATH = "./session.json";
@@ -49,10 +50,24 @@ client.on('ready', () => {
     console.log('Client is ready!');
 });
 
-client.on('message', msg => {
-    if (msg.mediaKey == '/HGPJEtiCMoCU3rRSgNr2966teO0KLMrpSi+/LpIMDY=') {
-        msg.reply('B');
+client.on('message', async (msg) => {
+    if (msg.body.startsWith("!setResponse")) {
+        console.log(msg.body.split(" ").length);
+        if (msg.body.split(" ").length == 1) {
+            msg.reply("Please consider adding a response");
+            return;
+        }
+        let quotedMessage = await msg.getQuotedMessage();
+        if (quotedMessage == undefined) {
+            msg.reply("Please consider quoting a message");
+            return;
+        }
+        responses[`${quotedMessage.clientUrl}`] = msg.body.replace("!setResponse ", "");
+        let data = JSON.stringify(responses);
+        fs.writeFileSync('./responses.json', data);
+        return;
     }
+    if (responses[`${msg.clientUrl}`] != undefined) msg.reply(responses[`${msg.clientUrl}`]);
     if (msg.body == '!ping') {
         msg.reply('pong');
     }
@@ -100,7 +115,7 @@ async function sendMeme(msg) {
     let newMeme = await getMemeJSON();
     downloadImageFromUrl(newMeme.url, async (success) => {
         if (!success) return;
-        var imageAsBase64 = fs.readFileSync('./meme.jpg', 'base64');
+        var imageAsBase64 = await fs.readFileSync('./meme.jpg', 'base64');
         var mm = new MessageMedia("image/jpg", imageAsBase64);
         client.sendMessage(msg.from, mm, { caption: newMeme.title });
     });

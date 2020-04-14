@@ -1,3 +1,3 @@
 exports.run = (client, msg, args) => {
-    msg.reply(`ID from this chat is: ${msg.to}`);
+    msg.reply(`ID from this chat is: ${msg.from}`);
 }

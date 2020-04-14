@@ -1,13 +1,8 @@
 let { Client, MessageMedia } = require('whatsapp-web.js');
 let fs = require('fs');
-let fetch = require('node-fetch');
-let Jimp = require("jimp");
-let request = require('request');
-const { readFile } = require('fs');
-const { promisify } = require('util');
-let keys = require('./key.json');
+let Enmap = require('enmap');
 let responses = require('./responses.json');
-let readFileAsync = promisify(readFile);
+let qrcode = require('qrcode-terminal');
 
 const SESSION_FILE_PATH = "./session.json";
 let sessionConfig;
@@ -16,10 +11,20 @@ if (fs.existsSync(SESSION_FILE_PATH)) {
 }
 
 let client = new Client({ session: sessionConfig });
+client.commands = new Enmap();
+client.messagemedia = MessageMedia;
 
-let express = require("express");
-let qrcode = require('qrcode-terminal');
 
+fs.readdir("./commands/", (err, files) => {
+    if (err) return console.error(err);
+    files.forEach(file => {
+        if (!file.endsWith(".js")) return;
+        let props = require(`./commands/${file}`);
+        let commandName = file.split(".")[0];
+        console.log(`Attempting to load command ${commandName}`);
+        client.commands.set(commandName, props);
+    });
+});
 
 client.on('qr', (qr) => {
     console.log('QR RECEIVED', qr);
@@ -31,7 +36,6 @@ client.on('auth_failure', msg => {
 });
 
 client.on('authenticated', (session) => {
-    console.log('AUTHENTICATED', session);
     sessionCfg = session;
     fs.writeFile(SESSION_FILE_PATH, JSON.stringify(session), function (err) {
         if (err) {
@@ -40,108 +44,22 @@ client.on('authenticated', (session) => {
     });
 });
 
-let possible = [
-    "mijn fiets is lek",
-    "wifi over de kabel is gratis",
-    "mijn fiets is lek"
-];
 
 client.on('ready', () => {
     console.log('Client is ready!');
 });
 
 client.on('message', async (msg) => {
-    if (msg.body.startsWith("!setResponse")) {
-        console.log(msg.body.split(" ").length);
-        if (msg.body.split(" ").length == 1) {
-            msg.reply("Please consider adding a response");
-            return;
-        }
-        let quotedMessage = await msg.getQuotedMessage();
-        if (quotedMessage == undefined) {
-            msg.reply("Please consider quoting a message");
-            return;
-        }
-        responses[`${quotedMessage.clientUrl}`] = msg.body.replace("!setResponse ", "");
-        let data = JSON.stringify(responses);
-        fs.writeFileSync('./responses.json', data);
+    if (msg.body.indexOf('!') !== 0) {
+        let possibleResponse = msg.hasMedia ? responses['media'][msg.clientUrl] : responses['text'][msg.body.toLowerCase()];
+        if (possibleResponse != null) msg.reply(possibleResponse);
         return;
     }
-    if (responses[`${msg.clientUrl}`] != undefined) msg.reply(responses[`${msg.clientUrl}`]);
-    if (msg.body == '!ping') {
-        msg.reply('pong');
-    }
-    if (msg.body == '!bart') {
-        msg.reply(possible[Math.floor(Math.random() * possible.length)]);
-    }
-    if (msg.body == '!meme') {
-        sendMeme(msg);
-    }
-    if (msg.body == '!rik') {
-        msg.reply("WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH");
-    }
-    if (msg.body.toLowerCase().includes("herres")) {
-        msg.reply("HAHAHAHAHAHA, HIJ ZEI HERRES!");
-    }
-    if (msg.body.toLowerCase().startsWith("!fortnite")) {
-        let split = msg.body.split(" ");
-        if (split.length == 1) {
-            msg.reply("Specificeer een gebruikersnaam!");
-            return;
-        }
-
-        sendStats(msg, msg.body.replace("!fortnite ", ""));
-    }
+    const args = msg.body.slice('!'.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+    const cmd = client.commands.get(command);
+    if (!cmd) return;
+    cmd.run(client, msg, args);
 });
-
-async function sendStats(msg, playerName) {
-    let response = await fetch(`https://api.fortnitetracker.com/v1/profile/pc/${playerName}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "TRN-Api-Key": keys.fortnite,
-        },
-        credentials: "same-origin"
-    });
-    let body = await response.json();
-    let statsString = "";
-    for (let stat in body.lifeTimeStats) {
-        statsString += `${body.lifeTimeStats[stat].key} : ${body.lifeTimeStats[stat].value}\n`;
-    }
-    msg.reply(`Statistieken voor ${playerName}:\n\n${statsString}`);
-}
-
-async function sendMeme(msg) {
-    let newMeme = await getMemeJSON();
-    downloadImageFromUrl(newMeme.url, async (success) => {
-        if (!success) return;
-        var imageAsBase64 = await fs.readFileSync('./meme.jpg', 'base64');
-        var mm = new MessageMedia("image/jpg", imageAsBase64);
-        client.sendMessage(msg.from, mm, { caption: newMeme.title });
-    });
-}
-
-async function getMemeJSON() {
-    let response = await fetch('http://meme-api.herokuapp.com/gimme');
-    let data = await response.json();
-    return data;
-}
-
-async function convertMeme() {
-    Jimp.read("./meme.png", function (err, image) {
-        image.scaleToFit(512, 512).write("./meme.jpg");
-    });
-}
-
-async function downloadImageFromUrl(url, callback) {
-    let extension = url.endsWith("png") ? "png" : "jpg";
-    request.head(url, (err, body) => {
-        if (err) return callback(false);
-        request(url).pipe(fs.createWriteStream(`./meme.${extension}`)).on('close', () => {
-            if (extension === "png") convertMeme();
-            return callback(true);
-        })
-    })
-}
 
 client.initialize();

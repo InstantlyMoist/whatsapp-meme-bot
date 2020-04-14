@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "enmap": "^5.2.4",
     "express": "^4.17.1",
     "fortnite-api": "^3.4.0",
     "http": "0.0.0",

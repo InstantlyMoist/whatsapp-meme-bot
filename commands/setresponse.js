@@ -1,7 +1,12 @@
 let responses = require('./../responses.json');
 let fs = require('fs');
+let admins = require("./../data/admins.json");
 
 exports.run = async (client, msg, args) => {
+    if (!admins.admins.includes(msg.author) && !admins.admins.includes(msg.from)) {
+        msg.reply("You don't have permission to add responses");
+        return;
+    }
     if (args.length == 0) {
         msg.reply("Please consider adding a response")
         return;

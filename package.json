@@ -9,9 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "canvas": "^2.6.1",
     "enmap": "^5.2.4",
     "express": "^4.17.1",
     "fortnite-api": "^3.4.0",
+    "gm": "^1.23.1",
     "http": "0.0.0",
     "jimp": "^0.9.8",
     "node-fetch": "^2.6.0",

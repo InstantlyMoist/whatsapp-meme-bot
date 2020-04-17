@@ -1,6 +1,9 @@
 let fetch = require('node-fetch');
 let keys = require('./../key.json');
 
+exports.name = "fortnite";
+exports.description = "Sends the fortnite statistics from a given player";
+
 exports.run = async (client, msg, args) => {
     if (args.length == 0) {
         msg.reply("Please specify an username.");

@@ -2,6 +2,9 @@ let responses = require('./../responses.json');
 let fs = require('fs');
 let admins = require("./../data/admins.json");
 
+exports.name = "deleteresponse";
+exports.description = "Deletes a response on a type of media, or text";
+
 exports.run = async (client, msg, args) => {
     let quotedMessage = await msg.getQuotedMessage();
     if (!admins.admins.includes(msg.author) && !admins.admins.includes(msg.from)) {

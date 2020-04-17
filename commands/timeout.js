@@ -2,6 +2,9 @@ let fs = require('fs');
 let data = require("./../data/data.json");
 let admins = require("./../data/admins.json");
 
+exports.name = "timeout";
+exports.description = "Times out the bot for a certain amount of time";
+
 exports.run = (client, msg, args) => {
     if (!admins.admins.includes(msg.author) && !admins.admins.includes(msg.from)) {
         msg.reply("You don't have permission to add responses");

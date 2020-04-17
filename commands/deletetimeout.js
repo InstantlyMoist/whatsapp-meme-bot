@@ -2,6 +2,9 @@ let fs = require('fs');
 let data = require("./../data/data.json");
 let admins = require("./../data/admins.json");
 
+exports.name = "deletetimeout";
+exports.description = "Deletes the given timeout.";
+
 exports.run = (client, msg, args) => {
     if (!admins.admins.includes(msg.author) && !admins.admins.includes(msg.from)) {
         msg.reply("You don't have permission to add responses");

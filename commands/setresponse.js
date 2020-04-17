@@ -2,6 +2,9 @@ let responses = require('./../responses.json');
 let fs = require('fs');
 let admins = require("./../data/admins.json");
 
+exports.name = "setresponse";
+exports.description = "Sets bot response for a type of media, or text.";
+
 exports.run = async (client, msg, args) => {
     if (!admins.admins.includes(msg.author) && !admins.admins.includes(msg.from)) {
         msg.reply("You don't have permission to add responses");

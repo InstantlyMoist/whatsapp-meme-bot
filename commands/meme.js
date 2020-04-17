@@ -4,6 +4,9 @@ let fs = require('fs');
 let fetch = require('node-fetch');
 let MessageMedia;
 
+exports.name = "meme";
+exports.description = "Sends a meme";
+
 exports.run = async (client, msg, args) => {
     MessageMedia = client.messagemedia;
     let newMeme = await getMemeJSON();

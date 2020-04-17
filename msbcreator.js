@@ -1,5 +1,4 @@
 let { registerFont, createCanvas, loadImage } = require('canvas')
-registerFont('./assets/impact.ttf', {family: 'Impact'});
 let fs = require('fs')
 
 let MessageMedia;
@@ -11,6 +10,7 @@ let sendMock = (client, msg, args) => {
     MessageMedia = client.messagemedia;
     const canvas = createCanvas(WIDTH, HEIGHT)
     const ctx = canvas.getContext('2d')
+    registerFont('./assets/impact.ttf', {family: 'Impact'});
     ctx.font = '30px Impact'
 
     let finalText = randomizeCaps(args.join(" "));

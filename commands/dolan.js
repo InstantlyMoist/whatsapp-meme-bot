@@ -1,5 +1,8 @@
 let fetch = require('node-fetch');
 
+exports.name = "dolan";
+exports.description = "Nothing yet...";
+
 exports.run = async (client, msg, args) => {
     msg.reply("Work in progress...");
     return;

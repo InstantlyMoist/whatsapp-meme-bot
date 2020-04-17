@@ -8,7 +8,7 @@ exports.run = async (client, msg, args) => {
         return;
     }
     if (args.length == 0) {
-        msg.reply("Please consider adding a response")
+        msg.reply("Please consider adding a response");
         return;
     }
     let quotedMessage = await msg.getQuotedMessage();

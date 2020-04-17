@@ -3,6 +3,8 @@ let fs = require('fs');
 let Enmap = require('enmap');
 let responses = require('./responses.json');
 let qrcode = require('qrcode-terminal');
+let data = require("./data/data.json");
+let admins = require("./data/admins.json");
 
 const SESSION_FILE_PATH = "./session.json";
 let sessionConfig;
@@ -49,7 +51,8 @@ client.on('ready', () => {
     console.log('Client is ready!');
 });
 
-client.on('message', async (msg) => {
+client.on('message', async (msg) => {   
+    if (data.timeout > Date.now() && (!admins.admins.includes(msg.author) && !admins.admins.includes(msg.from))) return;
     if (msg.body.indexOf('!') !== 0) {
         let possibleResponse = msg.hasMedia ? responses['media'][msg.clientUrl] : responses['text'][msg.body.toLowerCase()];
         if (possibleResponse != null) msg.reply(possibleResponse);

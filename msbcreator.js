@@ -1,4 +1,5 @@
-let { createCanvas, loadImage } = require('canvas')
+let { registerFont, createCanvas, loadImage } = require('canvas')
+registerFont('./assets/impact.ttf', {family: 'Impact'});
 let fs = require('fs')
 
 let MessageMedia;
@@ -63,7 +64,7 @@ let drawText = (ctx, top, text) => {
     ctx.fillStyle = "#FFFFFF";
     ctx.strokeStyle = "#000000";
     let textDimensions = ctx.measureText(text);
-    ctx.fillText(text, WIDTH / 2 - textDimensions.width / 2, top ? 40 : HEIGHT - 40);
+    ctx.fillText(text, WIDTH / 2 - textDimensions.width / 2, top ? 40 : HEIGHT - 30);
     ctx.strokeText(text, WIDTH / 2 - textDimensions.width / 2, top ? 40 : HEIGHT - 30);
 }
 
